@@ -143,7 +143,12 @@ func GetPregeneratedCRD(crdName string) apiextensionsv1.CustomResourceDefinition
 func createCNPCRD(clientset apiextensionsclient.Interface) error {
 	ciliumCRD := GetPregeneratedCRD(CNPCRDName)
 
-	return createUpdateCRD(clientset, CNPCRDName, constructV1CRD(k8sconstv2.CNPName, ciliumCRD))
+	return createUpdateCRD(
+		clientset,
+		CNPCRDName,
+		constructV1CRD(k8sconstv2.CNPName, ciliumCRD),
+		newDefaultPoller(),
+	)
 }
 
 // createCCNPCRD creates and updates the CiliumClusterwideNetworkPolicy CRD. It
@@ -151,7 +156,12 @@ func createCNPCRD(clientset apiextensionsclient.Interface) error {
 func createCCNPCRD(clientset apiextensionsclient.Interface) error {
 	ciliumCRD := GetPregeneratedCRD(CCNPCRDName)
 
-	return createUpdateCRD(clientset, CCNPCRDName, constructV1CRD(k8sconstv2.CCNPName, ciliumCRD))
+	return createUpdateCRD(
+		clientset,
+		CCNPCRDName,
+		constructV1CRD(k8sconstv2.CCNPName, ciliumCRD),
+		newDefaultPoller(),
+	)
 }
 
 // createCEPCRD creates and updates the CiliumEndpoint CRD. It should be called
@@ -159,7 +169,12 @@ func createCCNPCRD(clientset apiextensionsclient.Interface) error {
 func createCEPCRD(clientset apiextensionsclient.Interface) error {
 	ciliumCRD := GetPregeneratedCRD(CEPCRDName)
 
-	return createUpdateCRD(clientset, CEPCRDName, constructV1CRD(k8sconstv2.CEPName, ciliumCRD))
+	return createUpdateCRD(
+		clientset,
+		CEPCRDName,
+		constructV1CRD(k8sconstv2.CEPName, ciliumCRD),
+		newDefaultPoller(),
+	)
 }
 
 // createNodeCRD creates and updates the CiliumNode CRD. It should be called on
@@ -167,7 +182,12 @@ func createCEPCRD(clientset apiextensionsclient.Interface) error {
 func createNodeCRD(clientset apiextensionsclient.Interface) error {
 	ciliumCRD := GetPregeneratedCRD(CNCRDName)
 
-	return createUpdateCRD(clientset, CNCRDName, constructV1CRD(k8sconstv2.CNName, ciliumCRD))
+	return createUpdateCRD(
+		clientset,
+		CNCRDName,
+		constructV1CRD(k8sconstv2.CNName, ciliumCRD),
+		newDefaultPoller(),
+	)
 }
 
 // createIdentityCRD creates and updates the CiliumIdentity CRD. It should be
@@ -175,7 +195,12 @@ func createNodeCRD(clientset apiextensionsclient.Interface) error {
 func createIdentityCRD(clientset apiextensionsclient.Interface) error {
 	ciliumCRD := GetPregeneratedCRD(CIDCRDName)
 
-	return createUpdateCRD(clientset, CIDCRDName, constructV1CRD(k8sconstv2.CIDName, ciliumCRD))
+	return createUpdateCRD(
+		clientset,
+		CIDCRDName,
+		constructV1CRD(k8sconstv2.CIDName, ciliumCRD),
+		newDefaultPoller(),
+	)
 }
 
 // createUpdateCRD ensures the CRD object is installed into the K8s cluster. It
@@ -188,6 +213,7 @@ func createUpdateCRD(
 	clientset apiextensionsclient.Interface,
 	crdName string,
 	crd *apiextensionsv1.CustomResourceDefinition,
+	poller poller,
 ) error {
 	scopedLog := log.WithField("name", crdName)
 
@@ -199,6 +225,7 @@ func createUpdateCRD(
 			clientset.ApiextensionsV1beta1(),
 			crdName,
 			crd,
+			poller,
 		)
 	}
 
@@ -224,10 +251,10 @@ func createUpdateCRD(
 		return err
 	}
 
-	if err := updateV1CRD(scopedLog, crd, clusterCRD, v1CRDClient); err != nil {
+	if err := updateV1CRD(scopedLog, crd, clusterCRD, v1CRDClient, poller); err != nil {
 		return err
 	}
-	if err := waitForV1CRD(scopedLog, crdName, clusterCRD, v1CRDClient); err != nil {
+	if err := waitForV1CRD(scopedLog, crdName, clusterCRD, v1CRDClient, poller); err != nil {
 		return err
 	}
 
@@ -241,6 +268,7 @@ func createUpdateV1beta1CRD(
 	client v1beta1client.CustomResourceDefinitionsGetter,
 	crdName string,
 	crd *apiextensionsv1.CustomResourceDefinition,
+	poller poller,
 ) error {
 	v1beta1CRD, err := convertToV1Beta1CRD(crd)
 	if err != nil {
@@ -268,10 +296,10 @@ func createUpdateV1beta1CRD(
 		return err
 	}
 
-	if err := updateV1beta1CRD(scopedLog, v1beta1CRD, clusterCRD, client); err != nil {
+	if err := updateV1beta1CRD(scopedLog, v1beta1CRD, clusterCRD, client, poller); err != nil {
 		return err
 	}
-	if err := waitForV1beta1CRD(scopedLog, crdName, clusterCRD, client); err != nil {
+	if err := waitForV1beta1CRD(scopedLog, crdName, clusterCRD, client, poller); err != nil {
 		return err
 	}
 
@@ -397,6 +425,7 @@ func updateV1CRD(
 	scopedLog *logrus.Entry,
 	crd, clusterCRD *apiextensionsv1.CustomResourceDefinition,
 	client v1client.CustomResourceDefinitionsGetter,
+	poller poller,
 ) error {
 	scopedLog.Debug("Checking if CRD (CustomResourceDefinition) needs update...")
 
@@ -404,7 +433,7 @@ func updateV1CRD(
 		scopedLog.Info("Updating CRD (CustomResourceDefinition)...")
 
 		// Update the CRD with the validation schema.
-		err := wait.Poll(500*time.Millisecond, 60*time.Second, func() (bool, error) {
+		err := poller.Poll(500*time.Millisecond, 60*time.Second, func() (bool, error) {
 			var err error
 			clusterCRD, err = client.CustomResourceDefinitions().Get(
 				context.TODO(),
@@ -451,6 +480,7 @@ func updateV1beta1CRD(
 	scopedLog *logrus.Entry,
 	crd, clusterCRD *apiextensionsv1beta1.CustomResourceDefinition,
 	client v1beta1client.CustomResourceDefinitionsGetter,
+	poller poller,
 ) error {
 	scopedLog.Debug("Checking if CRD (CustomResourceDefinition) needs update...")
 
@@ -458,7 +488,7 @@ func updateV1beta1CRD(
 		scopedLog.Info("Updating CRD (CustomResourceDefinition)...")
 
 		// Update the CRD with the validation schema.
-		err := wait.Poll(500*time.Millisecond, 60*time.Second, func() (bool, error) {
+		err := poller.Poll(500*time.Millisecond, 60*time.Second, func() (bool, error) {
 			var err error
 			if clusterCRD, err = client.CustomResourceDefinitions().Get(
 				context.TODO(),
@@ -506,10 +536,11 @@ func waitForV1CRD(
 	crdName string,
 	crd *apiextensionsv1.CustomResourceDefinition,
 	client v1client.CustomResourceDefinitionsGetter,
+	poller poller,
 ) error {
 	scopedLog.Debug("Waiting for CRD (CustomResourceDefinition) to be available...")
 
-	err := wait.Poll(500*time.Millisecond, 60*time.Second, func() (bool, error) {
+	err := poller.Poll(500*time.Millisecond, 60*time.Second, func() (bool, error) {
 		for _, cond := range crd.Status.Conditions {
 			switch cond.Type {
 			case apiextensionsv1.Established:
@@ -557,10 +588,11 @@ func waitForV1beta1CRD(
 	crdName string,
 	crd *apiextensionsv1beta1.CustomResourceDefinition,
 	client v1beta1client.CustomResourceDefinitionsGetter,
+	poller poller,
 ) error {
 	scopedLog.Debug("Waiting for CRD (CustomResourceDefinition) to be available...")
 
-	err := wait.Poll(500*time.Millisecond, 60*time.Second, func() (bool, error) {
+	err := poller.Poll(500*time.Millisecond, 60*time.Second, func() (bool, error) {
 		for _, cond := range crd.Status.Conditions {
 			switch cond.Type {
 			case apiextensionsv1beta1.Established:
@@ -601,4 +633,24 @@ func waitForV1beta1CRD(
 	}
 
 	return nil
+}
+
+// poller is an interface that abstracts the polling logic when dealing with
+// CRD changes / updates to the apiserver. The reason this exists is mainly for
+// unit-testing.
+type poller interface {
+	Poll(interval, duration time.Duration, conditionFn func() (bool, error)) error
+}
+
+func newDefaultPoller() defaultPoll {
+	return defaultPoll{}
+}
+
+type defaultPoll struct{}
+
+func (p defaultPoll) Poll(
+	interval, duration time.Duration,
+	conditionFn func() (bool, error),
+) error {
+	return wait.Poll(interval, duration, conditionFn)
 }
