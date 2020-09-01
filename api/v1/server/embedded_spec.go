@@ -2629,6 +2629,13 @@ func init() {
                     "GENERIC"
                   ]
                 },
+                "algorithm": {
+                  "type": "string",
+                  "enum": [
+                    "RANDOM",
+                    "MAGLEV"
+                  ]
+                },
                 "enabled": {
                   "type": "boolean"
                 },
@@ -6413,6 +6420,13 @@ func init() {
                     "GENERIC"
                   ]
                 },
+                "algorithm": {
+                  "type": "string",
+                  "enum": [
+                    "RANDOM",
+                    "MAGLEV"
+                  ]
+                },
                 "enabled": {
                   "type": "boolean"
                 },
@@ -6503,6 +6517,13 @@ func init() {
                 "GENERIC"
               ]
             },
+            "algorithm": {
+              "type": "string",
+              "enum": [
+                "RANDOM",
+                "MAGLEV"
+              ]
+            },
             "enabled": {
               "type": "boolean"
             },
@@ -6576,6 +6597,13 @@ func init() {
             "NONE",
             "NATIVE",
             "GENERIC"
+          ]
+        },
+        "algorithm": {
+          "type": "string",
+          "enum": [
+            "RANDOM",
+            "MAGLEV"
           ]
         },
         "enabled": {

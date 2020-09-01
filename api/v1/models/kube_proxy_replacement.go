@@ -418,6 +418,10 @@ type KubeProxyReplacementFeaturesNodePort struct {
 	// Enum: [NONE NATIVE GENERIC]
 	Acceleration string `json:"acceleration,omitempty"`
 
+	// algorithm
+	// Enum: [RANDOM MAGLEV]
+	Algorithm string `json:"algorithm,omitempty"`
+
 	// enabled
 	Enabled bool `json:"enabled,omitempty"`
 
@@ -437,6 +441,10 @@ func (m *KubeProxyReplacementFeaturesNodePort) Validate(formats strfmt.Registry)
 	var res []error
 
 	if err := m.validateAcceleration(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateAlgorithm(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -490,6 +498,49 @@ func (m *KubeProxyReplacementFeaturesNodePort) validateAcceleration(formats strf
 
 	// value enum
 	if err := m.validateAccelerationEnum("features"+"."+"nodePort"+"."+"acceleration", "body", m.Acceleration); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var kubeProxyReplacementFeaturesNodePortTypeAlgorithmPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["RANDOM","MAGLEV"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		kubeProxyReplacementFeaturesNodePortTypeAlgorithmPropEnum = append(kubeProxyReplacementFeaturesNodePortTypeAlgorithmPropEnum, v)
+	}
+}
+
+const (
+
+	// KubeProxyReplacementFeaturesNodePortAlgorithmRANDOM captures enum value "RANDOM"
+	KubeProxyReplacementFeaturesNodePortAlgorithmRANDOM string = "RANDOM"
+
+	// KubeProxyReplacementFeaturesNodePortAlgorithmMAGLEV captures enum value "MAGLEV"
+	KubeProxyReplacementFeaturesNodePortAlgorithmMAGLEV string = "MAGLEV"
+)
+
+// prop value enum
+func (m *KubeProxyReplacementFeaturesNodePort) validateAlgorithmEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, kubeProxyReplacementFeaturesNodePortTypeAlgorithmPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *KubeProxyReplacementFeaturesNodePort) validateAlgorithm(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Algorithm) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateAlgorithmEnum("features"+"."+"nodePort"+"."+"algorithm", "body", m.Algorithm); err != nil {
 		return err
 	}
 

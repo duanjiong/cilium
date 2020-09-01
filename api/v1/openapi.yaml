@@ -1751,6 +1751,11 @@ definitions:
                 - SNAT
                 - DSR
                 - HYBRID
+              algorithm:
+                type: string
+                enum:
+                - RANDOM
+                - MAGLEV
               acceleration:
                 type: string
                 enum:
