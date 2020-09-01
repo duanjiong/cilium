@@ -17,7 +17,7 @@ struct bpf_elf_map __section_maps LB6_REVERSE_NAT_MAP = {
 	.size_key	= sizeof(__u16),
 	.size_value	= sizeof(struct lb6_reverse_nat),
 	.pinning	= PIN_GLOBAL_NS,
-	.max_elem	= CILIUM_LB_MAP_MAX_ENTRIES,
+	.max_elem	= CILIUM_LB_MAP_MAX,
 	.flags		= CONDITIONAL_PREALLOC,
 };
 
@@ -35,7 +35,7 @@ struct bpf_elf_map __section_maps LB6_BACKEND_MAP = {
 	.size_key       = sizeof(__u16),
 	.size_value     = sizeof(struct lb6_backend),
 	.pinning        = PIN_GLOBAL_NS,
-	.max_elem       = CILIUM_LB_MAP_MAX_ENTRIES,
+	.max_elem       = CILIUM_LB_MAP_MAX,
 	.flags          = CONDITIONAL_PREALLOC,
 };
 
@@ -45,7 +45,7 @@ struct bpf_elf_map __section_maps LB6_AFFINITY_MAP = {
 	.size_key	= sizeof(struct lb6_affinity_key),
 	.size_value	= sizeof(struct lb_affinity_val),
 	.pinning	= PIN_GLOBAL_NS,
-	.max_elem	= CILIUM_LB_MAP_MAX_ENTRIES,
+	.max_elem	= CILIUM_LB_MAP_MAX,
 };
 #endif
 
@@ -68,7 +68,7 @@ struct bpf_elf_map __section_maps LB4_REVERSE_NAT_MAP = {
 	.size_key	= sizeof(__u16),
 	.size_value	= sizeof(struct lb4_reverse_nat),
 	.pinning	= PIN_GLOBAL_NS,
-	.max_elem	= CILIUM_LB_MAP_MAX_ENTRIES,
+	.max_elem	= CILIUM_LB_MAP_MAX,
 	.flags		= CONDITIONAL_PREALLOC,
 };
 
@@ -86,7 +86,7 @@ struct bpf_elf_map __section_maps LB4_BACKEND_MAP = {
 	.size_key       = sizeof(__u16),
 	.size_value     = sizeof(struct lb4_backend),
 	.pinning        = PIN_GLOBAL_NS,
-	.max_elem       = CILIUM_LB_MAP_MAX_ENTRIES,
+	.max_elem       = CILIUM_LB_MAP_MAX,
 	.flags          = CONDITIONAL_PREALLOC,
 };
 
@@ -96,7 +96,7 @@ struct bpf_elf_map __section_maps LB4_AFFINITY_MAP = {
 	.size_key	= sizeof(struct lb4_affinity_key),
 	.size_value	= sizeof(struct lb_affinity_val),
 	.pinning	= PIN_GLOBAL_NS,
-	.max_elem	= CILIUM_LB_MAP_MAX_ENTRIES,
+	.max_elem	= CILIUM_LB_MAP_MAX,
 };
 #endif
 
@@ -119,7 +119,7 @@ struct bpf_elf_map __section_maps LB_AFFINITY_MATCH_MAP = {
 	.size_key	= sizeof(struct lb_affinity_match),
 	.size_value	= sizeof(__u8), /* dummy value, map is used as a set */
 	.pinning	= PIN_GLOBAL_NS,
-	.max_elem	= CILIUM_LB_MAP_MAX_ENTRIES,
+	.max_elem	= CILIUM_LB_MAP_MAX,
 	.flags		= CONDITIONAL_PREALLOC,
 };
 #endif

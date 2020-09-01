@@ -132,6 +132,7 @@ func (h *HeaderfileWriter) WriteNodeConfig(w io.Writer, cfg *datapath.LocalNodeC
 	cDefinesMap["INIT_ID"] = fmt.Sprintf("%d", identity.GetReservedID(labels.IDNameInit))
 	cDefinesMap["REMOTE_NODE_ID"] = fmt.Sprintf("%d", identity.GetReservedID(labels.IDNameRemoteNode))
 	cDefinesMap["CILIUM_LB_MAP_MAX_ENTRIES"] = fmt.Sprintf("%d", lbmap.MaxEntries)
+	cDefinesMap["CILIUM_LB_MAP_MAX"] = fmt.Sprintf("%d", lbmap.MaxBackends)
 	cDefinesMap["TUNNEL_MAP"] = tunnel.MapName
 	cDefinesMap["TUNNEL_ENDPOINT_MAP_SIZE"] = fmt.Sprintf("%d", tunnel.MaxEntries)
 	cDefinesMap["ENDPOINTS_MAP"] = lxcmap.MapName
