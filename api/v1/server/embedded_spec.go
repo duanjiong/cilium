@@ -2639,6 +2639,9 @@ func init() {
                 "enabled": {
                   "type": "boolean"
                 },
+                "lutSize": {
+                  "type": "integer"
+                },
                 "mode": {
                   "type": "string",
                   "enum": [
@@ -6430,6 +6433,9 @@ func init() {
                 "enabled": {
                   "type": "boolean"
                 },
+                "lutSize": {
+                  "type": "integer"
+                },
                 "mode": {
                   "type": "string",
                   "enum": [
@@ -6527,6 +6533,9 @@ func init() {
             "enabled": {
               "type": "boolean"
             },
+            "lutSize": {
+              "type": "integer"
+            },
             "mode": {
               "type": "string",
               "enum": [
@@ -6608,6 +6617,9 @@ func init() {
         },
         "enabled": {
           "type": "boolean"
+        },
+        "lutSize": {
+          "type": "integer"
         },
         "mode": {
           "type": "string",

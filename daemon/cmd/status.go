@@ -194,6 +194,9 @@ func (d *Daemon) getKubeProxyReplacementStatus() *models.KubeProxyReplacement {
 		features.NodePort.Enabled = true
 		features.NodePort.Mode = strings.ToUpper(option.Config.NodePortMode)
 		features.NodePort.Algorithm = strings.ToUpper(option.Config.NodePortAlg)
+		if option.Config.NodePortAlg == option.NodePortAlgMaglev {
+			features.NodePort.LutSize = int64(option.Config.MaglevTableSize)
+		}
 		if option.Config.NodePortAcceleration == option.NodePortAccelerationGeneric {
 			features.NodePort.Acceleration = models.KubeProxyReplacementFeaturesNodePortAccelerationGENERIC
 		} else {

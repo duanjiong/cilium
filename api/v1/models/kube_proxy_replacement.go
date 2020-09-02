@@ -425,6 +425,9 @@ type KubeProxyReplacementFeaturesNodePort struct {
 	// enabled
 	Enabled bool `json:"enabled,omitempty"`
 
+	// lut size
+	LutSize int64 `json:"lutSize,omitempty"`
+
 	// mode
 	// Enum: [SNAT DSR HYBRID]
 	Mode string `json:"mode,omitempty"`
