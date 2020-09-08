@@ -72,7 +72,7 @@ struct bpf_elf_map __section_maps LB6_MAGLEV_MAP_INNER = {
 
 struct bpf_elf_map __section_maps LB6_MAGLEV_MAP_OUTER = {
 	.type		= BPF_MAP_TYPE_HASH_OF_MAPS,
-	.size_key	= sizeof(__u32),
+	.size_key	= sizeof(__u16),
 	.size_value	= sizeof(__u32),
 	.pinning	= PIN_GLOBAL_NS,
 	.inner_id	= CILIUM_MAP_MAGLEV6,
@@ -144,7 +144,7 @@ struct bpf_elf_map __section_maps LB4_MAGLEV_MAP_INNER = {
 
 struct bpf_elf_map __section_maps LB4_MAGLEV_MAP_OUTER = {
 	.type		= BPF_MAP_TYPE_HASH_OF_MAPS,
-	.size_key	= sizeof(__u32),
+	.size_key	= sizeof(__u16),
 	.size_value	= sizeof(__u32),
 	.pinning	= PIN_GLOBAL_NS,
 	.inner_id	= CILIUM_MAP_MAGLEV4,
