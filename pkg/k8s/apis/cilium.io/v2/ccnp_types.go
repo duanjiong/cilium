@@ -30,6 +30,7 @@ import (
 // +kubebuilder:subresource:status
 // +kubebuilder:storageversion
 // +kubebuilder:topleveldesc
+// +kubebuilder:xpreserveunknownfields
 
 // CiliumClusterwideNetworkPolicy is a Kubernetes third-party resource with an
 // modified version of CiliumNetworkPolicy which is cluster scoped rather than

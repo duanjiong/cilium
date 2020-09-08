@@ -38,6 +38,7 @@ import (
 // +kubebuilder:subresource:status
 // +kubebuilder:storageversion
 // +kubebuilder:topleveldesc
+// +kubebuilder:xpreserveunknownfields
 
 // CiliumNetworkPolicy is a Kubernetes third-party resource with an extended
 // version of NetworkPolicy.
