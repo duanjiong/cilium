@@ -33,6 +33,7 @@ import (
 	"github.com/cilium/cilium/pkg/defaults"
 	"github.com/cilium/cilium/pkg/identity"
 	"github.com/cilium/cilium/pkg/labels"
+	"github.com/cilium/cilium/pkg/maglev"
 	"github.com/cilium/cilium/pkg/maps/bwmap"
 	"github.com/cilium/cilium/pkg/maps/callsmap"
 	"github.com/cilium/cilium/pkg/maps/ctmap"
@@ -309,8 +310,8 @@ func (h *HeaderfileWriter) WriteNodeConfig(w io.Writer, cfg *datapath.LocalNodeC
 			cDefinesMap["LB4_MAGLEV_MAP_OUTER"] = lbmap.MaglevOuter4MapName
 		}
 	}
-	cDefinesMap["HASH_INIT_SEED"] = fmt.Sprintf("%d", option.Config.MaglevTableSize)
-	cDefinesMap["HASH_ADDR_SEED"] = fmt.Sprintf("%d", option.Config.MaglevTableSize)
+	cDefinesMap["HASH_INIT_SEED"] = fmt.Sprintf("%d", maglev.SeedJhash0)
+	cDefinesMap["HASH_ADDR_SEED"] = fmt.Sprintf("%d", maglev.SeedJhash1)
 	if option.Config.EnableNodePort {
 		directRoutingIface := option.Config.DirectRoutingDevice
 		directRoutingIfIndex, err := link.GetIfIndex(directRoutingIface)
