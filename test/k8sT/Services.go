@@ -1221,6 +1221,42 @@ var _ = Describe("K8sServicesTest", func() {
 			testNodePort(false, false, false, 0)
 		})
 
+		testMaglev := func() {
+			var (
+				data  v1.Service
+				count = 10
+			)
+
+			err := kubectl.Get(helpers.DefaultNamespace, "service echo").Unmarshal(&data)
+			ExpectWithOffset(1, err).Should(BeNil(), "Cannot retrieve service")
+
+			for _, port := range []int{60000, 61000, 62000} {
+				dstPod := ""
+
+				// Send requests from the same IP and port to different nodes, and check
+				// that the same backend is selected
+
+				for _, host := range []string{k8s1IP, k8s2IP} {
+					url := getTFTPLink(host, data.Spec.Ports[1].NodePort)
+					cmd := helpers.CurlFail("--local-port %d %s", port, url) + " | grep 'Hostname:' " // pod name is in the hostname
+
+					By("Making %d HTTP requests from %s:%d to %q", count, outsideNodeName, port, url)
+
+					for i := 1; i <= count; i++ {
+						res := kubectl.ExecInHostNetNS(context.TODO(), outsideNodeName, cmd)
+						ExpectWithOffset(1, res).Should(helpers.CMDSuccess(),
+							"Cannot connect to service %q (%d/%d)", url, i, count)
+						pod := strings.TrimSpace(strings.Split(res.Stdout(), ": ")[1])
+						if dstPod == "" {
+							dstPod = pod
+						} else {
+							ExpectWithOffset(1, dstPod).To(Equal(pod))
+						}
+					}
+				}
+			}
+		}
+
 		SkipItIf(helpers.RunsWithoutKubeProxy, "Tests NodePort (kube-proxy) with externalTrafficPolicy=Local", func() {
 			DeployCiliumOptionsAndDNS(kubectl, ciliumFilename, map[string]string{
 				// When kube-proxy is enabled, the host firewall is not
@@ -1545,6 +1581,33 @@ var _ = Describe("K8sServicesTest", func() {
 						It("Tests NodePort with L7 Policy", func() {
 							applyPolicy(demoPolicyL7)
 							testNodePort(false, false, false, 0)
+						})
+					})
+
+					SkipContextIf(helpers.DoesNotExistNodeWithoutCilium, "Tests Maglev", func() {
+						var echoYAML string
+
+						BeforeAll(func() {
+							DeployCiliumOptionsAndDNS(kubectl, ciliumFilename, map[string]string{
+								"global.tunnel":               "disabled",
+								"global.autoDirectNodeRoutes": "true",
+								"global.nodePort.algorithm":   "maglev",
+								"config.maglev.tableSize":     "251",
+							})
+
+							echoYAML = helpers.ManifestGet(kubectl.BasePath(), "echo-svc.yaml")
+							kubectl.ApplyDefault(echoYAML).ExpectSuccess("unable to apply %s", echoYAML)
+							err := kubectl.WaitforPods(helpers.DefaultNamespace, "-l name=echo", helpers.HelperTimeout)
+							Expect(err).Should(BeNil())
+						})
+
+						AfterAll(func() {
+							kubectl.Delete(echoYAML)
+						})
+
+						It("Tests", func() {
+							testNodePort(true, false, true, 0)
+							testMaglev()
 						})
 					})
 
